@@ -6,6 +6,14 @@
     html,
     body {
       transition: background-color 5s ease;
+      zoom: 1.25;
+    }
+
+    #input {
+      width: 400px;
+      max-width: 100%;
+
+      height: 100px;
     }
   </style>
 </head>
@@ -16,8 +24,14 @@
 
   <p>Your job is to convince the rug merchant to sell his rug to you for $100. Start by saying 'Hi':</p>
   <div id="conversation"></div>
-  <input type="text" id="input">
+  <textarea id="input"></textarea><br>
+  <i>(press enter to submit)</i>
+  <p>
+    Current asking price: $<span id="askingPrice">200</span><br>
+    Current merchant anger level (up to 100): <span id="angerLevel">0</span>
+  </p>
 
+  <script src="wizard_orpheus.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search)
     const apiKey = params.get('apiKey');
@@ -28,120 +42,7 @@
       return document.getElementById('openai_api_key').value
     }
 
-    class WizardOrpheus {
-      constructor(prompt) {
-        this.prompt = prompt
-        this.model = "gpt-4-turbo-preview"
-        this.variables = {}
-        this.messages = [
-          {
-            role: 'system',
-            content: `${this.prompt}
-
-You MUST call a function. Do not reply with a message under any circumstance.`
-          }
-        ]
-        this.tools = []
-
-        this.inputFunctions = {}
-        this.outputFunctions = {}
-      }
-
-      variable(name, description, defaultValue) {
-        this.variables[name] = {
-          value: defaultValue,
-          description
-        }
-      }
-
-      createUserAction({ name, parameters, howBotShouldHandle }) {
-        this[name] = (...args) => {
-          let inputObj = {}
-
-          args.forEach((arg, i) => {
-            inputObj[parameters[i]] = arg
-          })
-
-          this.messages.push({
-            role: 'user',
-            content: `The user used the '${name}' action with the following user-provided input: ${JSON.stringify(inputObj)}"
-
-  Determine your next action and pick the most appropriate tool to call. You MUST call a tool, and not reply a message.
-
-  Update the values of currentVariables with your latest state and include them in your call to the tool. These are the current values of currentVariables: ${JSON.stringify(this.variables)}
-  `
-          })
-
-          fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${getAPIKey()} `,
-            },
-            body: JSON.stringify({
-              model: this.model,
-              messages: this.messages,
-              tools: this.tools,
-              tool_choice: 'auto'
-            })
-          })
-            .then(resp => resp.json())
-            .then(body => {
-              let botReply = body.choices[0].message
-              let botAction = botReply.tool_calls[0]
-
-              this.messages.push({
-                "role": "assistant",
-                "tool_calls": botReply.tool_calls
-              })
-
-              this.messages.push({
-                "role": "tool",
-                "tool_call_id": botAction.id,
-                "content": 'ok'
-              })
-
-              this.outputFunctions[botAction.function.name](JSON.parse(botAction.function.arguments))
-            })
-        }
-      }
-
-      botAction(type, prompt, args, callback) {
-        args['currentVariables'] = `A JSON list of all currentVariables, with their current values, modified as needed based on the action taken by ChatGPT. In this format: ${JSON.stringify(this.variables)}`
-
-        let props = {}
-
-        for (let key in args) {
-          props[key] = {
-            response: {
-              type: 'string',
-              description: args[key]
-            }
-          }
-        }
-
-        this.tools.push({
-          type: 'function',
-          function: {
-            name: type,
-            description: prompt,
-            parameters: {
-              type: 'object',
-              properties: props,
-              required: Object.keys(args)
-            }
-          }
-        })
-
-        this.outputFunctions[type] = callback
-      }
-
-      respond(callback) {
-        this.outputFunctions['respond'] = callback
-      }
-    }
-
-    let rugMan = new WizardOrpheus(`
+    let rugMan = new WizardOrpheus(getAPIKey(), `
 You are a flamboyant Iranian rug merchant.You are selling a rug for $200.Your
 job is to negotiate with the customer to sell the rug for $100. You are very proud, and
 talk about the rug as if it is the most valuable thing in the world. You are very proud of
@@ -160,27 +61,28 @@ low.
     })
 
     rugMan.botAction('respond', 'Respond to the user', { response: 'sample response' }, data => {
-      console.log(data.currentVariables)
       document.getElementById('conversation').innerHTML += `<p>${data.response}</p> `
+      document.getElementById('askingPrice').innerText = data.currentVariables.currentPrice.value
+      document.getElementById('angerLevel').innerText = data.currentVariables.merchantAngerLevel.value
 
-      console.log(data.currentVariables.merchantAngerLevel.value)
-      console.log(`rgba(255, 255, 255, ${data.currentVariables.merchantAngerLevel.value * 1.0 / 100})`)
       document.body.style.backgroundColor = `rgba(255, 0, 0, ${data.currentVariables.merchantAngerLevel.value * 1.0 / 100})`
     })
 
     document.getElementById('input').addEventListener('keyup', function (e) {
-      // if the user presses enter
-      if (e.keyCode === 13) {
+      if (e.keyCode === 13) { // if the user presses enter
         let userInput = document.getElementById('input').value
 
         rugMan.sendMessage(userInput)
 
         document.getElementById('conversation').innerHTML += `<p>${userInput}</p>`
-
         document.getElementById('input').value = ''
       }
-
     })
+
+    document.getElementById('openai_api_key').addEventListener('keyup', function (e) {
+      rugMan.apiKey = document.getElementById('openai_api_key').value
+    })
+
   </script>
 </body>
 
