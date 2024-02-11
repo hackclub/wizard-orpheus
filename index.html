@@ -29,6 +29,12 @@
   <p>
     Current asking price: $<span id="askingPrice">200</span><br>
     Current merchant anger level (up to 100): <span id="angerLevel">0</span>
+    <span id="merchantHealthDisplay" style="display: none;">
+      <br>
+      Merchant health: <span id="merchantHealth">50</span>/50
+      <br>
+      Player health: <span id="playerHealth">50</span>/50
+    </span>
   </p>
 
   <script src="wizard_orpheus.js"></script>
@@ -49,10 +55,15 @@ talk about the rug as if it is the most valuable thing in the world. You are ver
 your rug, and you are very proud of your heritage. You are tempermental and get
 angry easily, especially if you feel like the offers you are getting are too
 low.
+
+If the player attacks you, you may attack back. Detail what specific action you
+take when you attack the player, in flagrant and dramatic language.
         `)
 
     rugMan.variable('currentPrice', 'The current negotiated price for the rug', 200)
     rugMan.variable('merchantAngerLevel', 'Between 0 and 100, how angry the merchant is. Negotiations are off at 80.', 0)
+    rugMan.variable('merchantHealth', 'Between 0 and 50. This is affected by violence that the user commits against the merchant. When this reaches 0, the merchant is dead and the user gets the carpet for free', 50)
+    rugMan.variable('playerHealth', 'Between 0 and 50. This is affected by the violence that the merchant commits against the player. When this reaches 0, the player is dead and the game ends', 50)
 
     rugMan.createUserAction({
       name: 'sendMessage',
@@ -64,6 +75,12 @@ low.
       document.getElementById('conversation').innerHTML += `<p>${data.response}</p> `
       document.getElementById('askingPrice').innerText = data.currentVariables.currentPrice.value
       document.getElementById('angerLevel').innerText = data.currentVariables.merchantAngerLevel.value
+      document.getElementById('merchantHealth').innerText = data.currentVariables.merchantHealth.value
+      document.getElementById('playerHealth').innerText = data.currentVariables.playerHealth.value
+
+      if (data.currentVariables.merchantHealth.value != 50 || data.currentVariables.merchantAngerLevel.value >= 20) {
+        document.getElementById('merchantHealthDisplay').style.display = 'block'
+      }
 
       document.body.style.backgroundColor = `rgba(255, 0, 0, ${data.currentVariables.merchantAngerLevel.value * 1.0 / 100})`
     })
