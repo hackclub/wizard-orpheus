@@ -19,6 +19,11 @@
   <input type="text" id="input">
 
   <script>
+    const params = new URLSearchParams(window.location.search)
+    const apiKey = params.get('apiKey');
+
+    document.getElementById('openai_api_key').value = apiKey
+
     function getAPIKey() {
       return document.getElementById('openai_api_key').value
     }
