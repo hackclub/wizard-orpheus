@@ -59,20 +59,20 @@ Update the values of currentVariables with your latest state and include them in
         .then(resp => resp.json())
         .then(body => {
           let botReply = body.choices[0].message
-          let botAction = botReply.tool_calls[0]
-
           this.messages.push({
             "role": "assistant",
             "tool_calls": botReply.tool_calls
           })
 
-          this.messages.push({
-            "role": "tool",
-            "tool_call_id": botAction.id,
-            "content": 'ok'
-          })
+          botReply.tool_calls.forEach(botAction => {
+            this.messages.push({
+              "role": "tool",
+              "tool_call_id": botAction.id,
+              "content": 'ok'
+            })
 
-          this.outputFunctions[botAction.function.name](JSON.parse(botAction.function.arguments))
+            this.outputFunctions[botAction.function.name](JSON.parse(botAction.function.arguments))
+          })
         })
     }
   }
