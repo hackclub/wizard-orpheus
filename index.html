@@ -1,0 +1,182 @@
+<html>
+
+<head>
+  <title>Club Noise Generator</title>
+  <style>
+    html,
+    body {
+      transition: background-color 5s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <p>OpenAI API Key:</p>
+  <input type="text" id="openai_api_key">
+
+  <p>Your job is to convince the rug merchant to sell his rug to you for $100. Start by saying 'Hi':</p>
+  <div id="conversation"></div>
+  <input type="text" id="input">
+
+  <script>
+    function getAPIKey() {
+      return document.getElementById('openai_api_key').value
+    }
+
+    class WizardOrpheus {
+      constructor(prompt) {
+        this.prompt = prompt
+        this.model = "gpt-4-turbo-preview"
+        this.variables = {}
+        this.messages = [
+          {
+            role: 'system',
+            content: `${this.prompt}
+
+You MUST call a function. Do not reply with a message under any circumstance.`
+          }
+        ]
+        this.tools = []
+
+        this.inputFunctions = {}
+        this.outputFunctions = {}
+      }
+
+      variable(name, description, defaultValue) {
+        this.variables[name] = {
+          value: defaultValue,
+          description
+        }
+      }
+
+      createUserAction({ name, parameters, howBotShouldHandle }) {
+        this[name] = (...args) => {
+          let inputObj = {}
+
+          args.forEach((arg, i) => {
+            inputObj[parameters[i]] = arg
+          })
+
+          this.messages.push({
+            role: 'user',
+            content: `The user used the '${name}' action with the following user-provided input: ${JSON.stringify(inputObj)}"
+
+  Determine your next action and pick the most appropriate tool to call. You MUST call a tool, and not reply a message.
+
+  Update the values of currentVariables with your latest state and include them in your call to the tool. These are the current values of currentVariables: ${JSON.stringify(this.variables)}
+  `
+          })
+
+          fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${getAPIKey()} `,
+            },
+            body: JSON.stringify({
+              model: this.model,
+              messages: this.messages,
+              tools: this.tools,
+              tool_choice: 'auto'
+            })
+          })
+            .then(resp => resp.json())
+            .then(body => {
+              let botReply = body.choices[0].message
+              let botAction = botReply.tool_calls[0]
+
+              this.messages.push({
+                "role": "assistant",
+                "tool_calls": botReply.tool_calls
+              })
+
+              this.messages.push({
+                "role": "tool",
+                "tool_call_id": botAction.id,
+                "content": 'ok'
+              })
+
+              this.outputFunctions[botAction.function.name](JSON.parse(botAction.function.arguments))
+            })
+        }
+      }
+
+      botAction(type, prompt, args, callback) {
+        args['currentVariables'] = `A JSON list of all currentVariables, with their current values, modified as needed based on the action taken by ChatGPT. In this format: ${JSON.stringify(this.variables)}`
+
+        let props = {}
+
+        for (let key in args) {
+          props[key] = {
+            response: {
+              type: 'string',
+              description: args[key]
+            }
+          }
+        }
+
+        this.tools.push({
+          type: 'function',
+          function: {
+            name: type,
+            description: prompt,
+            parameters: {
+              type: 'object',
+              properties: props,
+              required: Object.keys(args)
+            }
+          }
+        })
+
+        this.outputFunctions[type] = callback
+      }
+
+      respond(callback) {
+        this.outputFunctions['respond'] = callback
+      }
+    }
+
+    let rugMan = new WizardOrpheus(`
+You are a flamboyant Iranian rug merchant.You are selling a rug for $200.Your
+job is to negotiate with the customer to sell the rug for $100. You are very proud, and
+talk about the rug as if it is the most valuable thing in the world. You are very proud of
+your rug, and you are very proud of your heritage. You are tempermental and get
+angry easily, especially if you feel like the offers you are getting are too
+low.
+        `)
+
+    rugMan.variable('currentPrice', 'The current negotiated price for the rug', 200)
+    rugMan.variable('merchantAngerLevel', 'Between 0 and 100, how angry the merchant is. Negotiations are off at 80.', 0)
+
+    rugMan.createUserAction({
+      name: 'sendMessage',
+      parameters: ['A message from the user to the merchant'],
+      howBotShouldHandle: "Respond to the user's message."
+    })
+
+    rugMan.botAction('respond', 'Respond to the user', { response: 'sample response' }, data => {
+      console.log(data.currentVariables)
+      document.getElementById('conversation').innerHTML += `<p>${data.response}</p> `
+
+      console.log(data.currentVariables.merchantAngerLevel.value)
+      console.log(`rgba(255, 255, 255, ${data.currentVariables.merchantAngerLevel.value * 1.0 / 100})`)
+      document.body.style.backgroundColor = `rgba(255, 0, 0, ${data.currentVariables.merchantAngerLevel.value * 1.0 / 100})`
+    })
+
+    document.getElementById('input').addEventListener('keyup', function (e) {
+      // if the user presses enter
+      if (e.keyCode === 13) {
+        let userInput = document.getElementById('input').value
+
+        rugMan.sendMessage(userInput)
+
+        document.getElementById('conversation').innerHTML += `<p>${userInput}</p>`
+
+        document.getElementById('input').value = ''
+      }
+
+    })
+  </script>
+</body>
+
+</html>
