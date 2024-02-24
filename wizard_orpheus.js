@@ -2,6 +2,7 @@ console.log('🪄🦕 https://github.com/hackclub/wizard-orpheus')
 
 class WizardOrpheus {
   constructor(openAiApiKey, prompt) {
+    this.apiHost = 'https://wizard-orpheus.hackclub.dev/api'
     this.apiKey = openAiApiKey
     this.prompt = prompt
     this.model = "gpt-4-turbo-preview"
@@ -45,7 +46,7 @@ Update the values of currentVariables with your latest state and include them in
 `
       })
 
-      fetch('https://api.openai.com/v1/chat/completions', {
+      fetch(`${this.apiHost}/v1/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
