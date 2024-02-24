@@ -1,6 +1,6 @@
 # Wizard Orpheus Docs!
 
-WizardOrpheus has 3 functions:
+WizardOrpheus has 4 functions:
 
 - `var game = new WizardOrpheus(apiKey, gameEnginePrompt`)
   - The Wizard Orpheus function will intitialize your game. You're able to input a prompt that will be fed to the bot and set the rules for the game. 
