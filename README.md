@@ -75,6 +75,7 @@ rug for only $100. You need to sell it for $200
 game.variable('playerHealth', `Current health of the player, from 0 to 100.
 Every time something happens where they get hurt (which happens often), this
 should decrease. They die at 0.`, 100)
+
 game.variable('merchantAngerLevel', `How angry the merchant is, on a scale from
 0 to 50. He is very tempermental.`, 0)
 ```
