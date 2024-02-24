@@ -1,7 +1,8 @@
-export const config = {
-  runtime: 'edge',
-}
+// for future rate limiting
+import { kv } from '@vercel/kv';
 
-export function GET(request) {
-  return new Response(`Hello from ${process.env.VERCEL_REGION}`);
+export async function POST(req) {
+  console.log(req.body.model)
+
+  return new Response(`Hello from ${req.body.model}`);
 }
