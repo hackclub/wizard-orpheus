@@ -37,7 +37,7 @@ export async function POST(req) {
 
   console.log(usage)
 
-  return enableCors(new Response(JSON.stringify(body), {
+  return enableCors(new Response(JSON.stringify(respBody), {
     headers: {
       'Content-Type': 'application/json',
     },
