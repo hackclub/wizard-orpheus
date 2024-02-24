@@ -4,6 +4,18 @@ import { kv } from '@vercel/kv';
 const defaultModel = 'gpt-4-turbo-preview'
 const apiKey = process.env.OPENAI_API_KEY
 
+function enableCors(resp) {
+  resp.headers.set('Access-Control-Allow-Origin', '*')
+  resp.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  resp.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+
+  return resp
+}
+
+export function OPTIONS(req) {
+  return enableCors(new Response(null, { status: 200 }))
+}
+
 // Proxy
 export async function POST(req) {
   const path = new URL(req.url).pathname.substring(4) // the .substring removes the leading /api/ from the path, which vercel adds
@@ -19,6 +31,8 @@ export async function POST(req) {
     },
     body: JSON.stringify(body)
   })
+
+  enableCors(resp)
 
   return resp
 }
