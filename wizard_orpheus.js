@@ -1,3 +1,5 @@
+console.log('🪄🦕 https://github.com/hackclub/wizard-orpheus')
+
 class WizardOrpheus {
   constructor(openAiApiKey, prompt) {
     this.apiKey = openAiApiKey
