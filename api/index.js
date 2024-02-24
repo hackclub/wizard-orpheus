@@ -32,7 +32,13 @@ export async function POST(req) {
     body: JSON.stringify(body)
   })
 
-  enableCors(resp)
+  let respBody = await resp.json();
+  let usage = respBody.usage
 
-  return resp
+  console.log(usage)
+
+  return enableCors(new Response(JSON.stringify(body), {
+    headers: resp.headers,
+    status: resp.status
+  }))
 }
