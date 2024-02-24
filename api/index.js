@@ -7,7 +7,7 @@ const apiKey = process.env.OPENAI_API_KEY
 function enableCors(resp) {
   resp.headers.set('Access-Control-Allow-Origin', '*')
   resp.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  resp.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+  resp.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
   return resp
 }
