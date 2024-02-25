@@ -2,7 +2,13 @@ console.log('🪄🦕 https://github.com/hackclub/wizard-orpheus')
 
 class WizardOrpheus {
   constructor(openAiApiKey, prompt) {
-    this.apiHost = 'https://wizard-orpheus.hackclub.dev/api'
+    if (openAiApiKey && !prompt) {
+      prompt = openAiApiKey
+      openAiApiKey = ''
+    }
+
+    // this.apiHost = 'https://wizard-orpheus.hackclub.dev/api'
+    this.apiHost = 'http://localhost:3000/api'
     this.apiKey = openAiApiKey
     this.prompt = prompt
     this.model = "gpt-4-turbo-preview"
@@ -49,6 +55,7 @@ Update the values of currentVariables with your latest state and include them in
       fetch(`${this.apiHost}/v1/chat/completions`, {
         method: 'POST',
         headers: {
+          'Wizard-Orpheus-URL': window.location.href,
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey} `,
         },
