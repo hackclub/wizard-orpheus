@@ -7,8 +7,7 @@ class WizardOrpheus {
       openAiApiKey = ''
     }
 
-    // this.apiHost = 'https://wizard-orpheus.hackclub.dev/api'
-    this.apiHost = 'http://localhost:3000/api'
+    this.apiHost = 'https://wizard-orpheus.hackclub.dev/api'
     this.apiKey = openAiApiKey
     this.prompt = prompt
     this.model = "gpt-4-turbo-preview"
