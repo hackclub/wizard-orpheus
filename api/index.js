@@ -50,6 +50,10 @@ export async function POST(req) {
   let respBody = await resp.json();
   let usage = respBody.usage
 
+  // Store in the DB. Each game has its rate limits info at `game:URL_OF_GAME`.
+  //
+  // We have a list of all games stored in `games` ranked by how many requests
+  // have been made to the game.
   try {
     let g = await kv.hgetall(`game:${gameUrl}`)
     if (!g) g = {}
@@ -64,6 +68,7 @@ export async function POST(req) {
     g.completionTokenCount = parseInt(g.completionTokenCount) + usage.completion_tokens
 
     await kv.hset(`game:${gameUrl}`, g)
+    await kv.zadd('games', parseInt(g.reqCount), gameUrl)
   } catch (e) {
     console.error('Redis error:', e)
   }
@@ -74,4 +79,9 @@ export async function POST(req) {
     },
     status: resp.status
   }))
+}
+
+// Gallery
+export async function GET(req) {
+
 }
