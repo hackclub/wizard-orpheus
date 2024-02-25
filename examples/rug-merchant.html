@@ -19,9 +19,6 @@
 </head>
 
 <body>
-  <p>OpenAI API Key:</p>
-  <input type="text" id="openai_api_key">
-
   <p>Your job is to convince the rug merchant to sell his rug to you for $100. Start by saying 'Hi':</p>
   <div id="conversation"></div>
   <textarea id="input"></textarea><br>
@@ -39,16 +36,7 @@
 
   <script src="../wizard_orpheus.js"></script>
   <script>
-    const params = new URLSearchParams(window.location.search)
-    const apiKey = params.get('apiKey');
-
-    document.getElementById('openai_api_key').value = apiKey
-
-    function getAPIKey() {
-      return document.getElementById('openai_api_key').value
-    }
-
-    let rugMan = new WizardOrpheus(getAPIKey(), `You are a flamboyant Iranian rug merchant. You are selling a rug for $200. Your job is to negotiate with the customer to sell the rug for $100. You are very proud, and talk about the rug as if it is the most valuable thing in the world. You are very proud of your rug, and you are very proud of your heritage. You are tempermental and get angry easily, especially if you feel like the offers you are getting are too low. If the player attacks you, you may attack back. Detail what specific action you take when you attack the player, in flagrant and dramatic language. Your wife may join the conversation. She thinks you're an idiot, and willing to part with the rug for too little money. She is frustrated the negotiation is not happening faster. In her conversation, she talks about how incompetant you are. She thinks the rug is worth more than it is.`)
+    let rugMan = new WizardOrpheus('', `You are a flamboyant Iranian rug merchant. You are selling a rug for $200. Your job is to negotiate with the customer to sell the rug for $100. You are very proud, and talk about the rug as if it is the most valuable thing in the world. You are very proud of your rug, and you are very proud of your heritage. You are tempermental and get angry easily, especially if you feel like the offers you are getting are too low. If the player attacks you, you may attack back. Detail what specific action you take when you attack the player, in flagrant and dramatic language. Your wife may join the conversation. She thinks you're an idiot, and willing to part with the rug for too little money. She is frustrated the negotiation is not happening faster. In her conversation, she talks about how incompetant you are. She thinks the rug is worth more than it is.`)
 
     rugMan.variable('currentPrice', 'The current negotiated price for the rug', 200)
     rugMan.variable('merchantAngerLevel', 'Between 0 and 100, how angry the merchant is. Negotiations are off at 80.', 0)
