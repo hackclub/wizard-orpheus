@@ -68,7 +68,7 @@ export async function POST(req) {
     g.completionTokenCount = parseInt(g.completionTokenCount) + usage.completion_tokens
 
     await kv.hset(`game:${gameUrl}`, g)
-    await kv.zadd('games', parseInt(g.reqCount), gameUrl)
+    await kv.zadd('games', { score: parseInt(g.reqCount), member: gameUrl })
   } catch (e) {
     console.error('Redis error:', e)
   }
