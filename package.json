@@ -1,6 +1,11 @@
 {
 	"dependencies": {
 		"@opentelemetry/api": "^1.7.0",
-		"@vercel/kv": "^1.0.1"
+		"@prisma/client": "^5.13.0",
+		"@vercel/kv": "^1.0.1",
+		"prisma": "^5.13.0"
+	},
+	"scripts": {
+		"vercel-build": "prisma generate && prisma migrate deploy && next build"
 	}
 }
