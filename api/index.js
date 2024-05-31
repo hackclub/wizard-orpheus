@@ -1,7 +1,7 @@
 // for future rate limiting
 import { kv } from '@vercel/kv';
 
-const defaultModel = 'gpt-4-turbo-preview'
+const defaultModel = 'gpt-4o-2024-05-13'
 const apiKey = process.env.OPENAI_API_KEY
 
 function enableCors(resp) {
