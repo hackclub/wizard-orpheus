@@ -58,7 +58,7 @@ Create an HTML file:
 
 WizardOrpheus has 4 functions:
 
-- `var game = new WizardOrpheus(apiKey, gameEnginePrompt`)
+- `var game = new WizardOrpheus(apiKey, gameEnginePrompt)`
   - The Wizard Orpheus function will intitialize your game. You're able to input a prompt that will be fed to the bot and set the rules for the game. 
 
 ```js
@@ -86,7 +86,7 @@ game.variable('merchantAngerLevel', `How angry the merchant is, on a scale from
 ```js
 game.createUserAction({
   name: 'message',
-  parameters: ['The user's message to the merchant'],
+  parameters: ["The user's message to the merchant"],
   howBotShouldHandle: 'Reply to the user with your own message'
 })
 
